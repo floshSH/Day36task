@@ -1,0 +1,156 @@
+1.   db.topics.aggregate([
+			{
+			$lookup:{
+				from:"tasks",
+				localfield:"topic_id",
+				foreignField:"topic_id",
+				as:"task_detail"
+			}},
+			$match:{
+$and:{
+	{topic_date:{$gte: new Date("2020-10-01"), $lt:new Date("2020-11-01")}
+},
+
+{
+
+$or:[ {"task_detail.due_date":{$gte: new Date("2020-10-01"), $lt:new Date("2020-11-01")}},
+	{"task_detail.due_date": {$exists:false}}
+]
+}
+]
+}},
+{
+$project:{
+_id:0,
+topic_id:1,
+topic:1,
+topic_date:1,
+tasks:"$task_detail.due_date}}
+])
+
+
+
+
+2. find company drive () between ()
+
+
+db.company_drive.find({
+
+	$or:{
+		{drive_date:{$gte:new Date("15-oct-2020")}},
+		{drive_date:{$lte:new Date("31-oct-2020")}}
+}
+})
+
+
+
+3. company drive and appeard students
+
+ db.company_drive.aggregate([
+			{
+			$lookup:{
+				from:"users",
+				localfield:"_id",
+				foreignField:"user_id",
+				as:"user_detail"
+			}},
+			{
+			$project:{
+			id:0,
+			company:1,
+			drive_date:1,
+			studets:"user_details"
+}
+])
+
+
+4.problems solved by user
+
+db.codekata.aggregate([
+		{
+		$lookup:{
+			from:"users,
+			localField:"user_id",
+			foreignField:"_id",
+			as:"user_details"
+			}
+		},
+
+			{
+		$group:{
+		    _id:{
+			user_id:"$user_id";
+			username:"$user_details.name"
+}
+		total_proplems_solved:{$sum:"$problems"}
+}
+	{
+		$project:{
+			_id:0,
+			userid:"$_id.userid",
+			username:"$_id.username",
+			total_problems_solved:1
+}}
+])
+
+
+
+5.mentors has 15 mentee's
+
+
+db.users.aggregate([
+    {
+$match:{mentor_id:{$exists:true}}
+},
+
+{  group:{
+	_id:"$mentr_id",
+	mentor_name:{$first:$mentor_name"},
+	mentee_count:{$sum:1}
+},
+		$match:{mentee_count:{$gt:15}}
+},
+{
+		$project:{
+			_id:0,
+			mentor_id:"$_id",
+			mentor_name:1,
+			mentee_count:1}}
+])
+
+
+
+
+6. db.attendance,aggregate([
+		{
+			$lookup:{
+				from:"topics",
+				localField:"topic_id",
+				foreignField:"_id",
+				as:"topics"
+		}},
+		{
+			$lookup:{	
+
+				from:"tasks",
+				localField:"topic_id",
+				foreignField:"_id",
+				as:"tasks"
+		}},
+		{
+			$match:{
+				attended: false,
+				"task submitted":false,
+			$and:{
+			{"topics.topic_date":{$gte: new Date("15-oct-2020")}},
+			{"topics.topic_date":{$lte: new Date("31-oct-2020")}},
+			{"tasks.due_date":{$gte: new Date("15-oct-2020")}},
+			{"tasks.due_date":{$lte: new Date("31-oct-2020")}}
+		]
+}}
+
+},
+			{$count:"No of students absent"}
+]) 
+
+				
